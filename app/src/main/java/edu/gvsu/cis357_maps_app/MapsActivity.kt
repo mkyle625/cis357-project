@@ -1,20 +1,33 @@
 package edu.gvsu.cis357_maps_app
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
+import edu.gvsu.cis357_maps_app.place.Place
+import edu.gvsu.cis357_maps_app.place.PlacesReader
 import edu.gvsu.cis357_maps_app.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+
+    private val places: List<Place> by lazy {
+        PlacesReader(this).read()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +52,49 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        // Add the markers and move the camera
+        val allendale_location = LatLng(42.96349236278699, -85.89065017075002)
+
+        mMap.addMarker(MarkerOptions().position(LatLng(42.96659164804782, -85.88666565494535)).title("Mackinac Hall").snippet("MAK"))
+
+        //mMap.addMarker(MarkerOptions().position(allendale_location).title("Allendale Campus"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(allendale_location))
+        mMap.setMinZoomPreference(15.0f)
+        mMap.setMaxZoomPreference(20.0f)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_schedule) {
+            // do something
+            val toSchedule = Intent(this@MapsActivity, ScheduleActivity::class.java)
+            val extras = Bundle()
+            //extras.putString("DISTANCE_UNITS", distanceUnits)
+            //extras.putString("BEARING_UNITS", bearingUnits)
+            toSchedule.putExtras(extras)
+            scheduleLauncher.launch(toSchedule)
+            //startActivity(toSettings)
+            return true
+        }
+        return false
+    }
+
+    var scheduleLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val extras = data?.extras
+            //distanceUnits = extras?.getString("DISTANCE_SELECTION").toString()
+            //bearingUnits = extras?.getString("BEARING_SELECTION").toString()
+            //calcButton?.performClick()
+            //val tv = findViewById<TextView>(R.id.message)
+            //vice = data?.getStringExtra("vice") ?: "Steak"
+            //tv.text = "Your vice is: " + vice
+        }
     }
 }
