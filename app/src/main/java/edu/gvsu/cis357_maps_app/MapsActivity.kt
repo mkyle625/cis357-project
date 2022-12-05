@@ -16,8 +16,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import edu.gvsu.cis357_maps_app.place.Place
-import edu.gvsu.cis357_maps_app.place.PlacesReader
 import edu.gvsu.cis357_maps_app.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -25,9 +23,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
-    private val places: List<Place> by lazy {
-        PlacesReader(this).read()
-    }
+    data class Marker(
+        val name: String,
+        val snippet: String,
+        val lat: Double,
+        val long: Double
+    )
+
+    var markers: MutableList<Marker> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +42,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        // Add the markers
+        addMarkers();
     }
 
+    private fun addMarkers() {
+        // All the buildings go here
+        markers.add(Marker("Mackinac Hall", "MAK", 42.96659164804782, -85.88666565494535))
+        markers.add(Marker("Manitou Hall", "MAN", 42.9662006256129, -85.88727636519421))
+        markers.add(Marker("Padnos Hall of Science", "PAD", 42.96520949618112, -85.88743079698898))
+        markers.add(Marker("Loutit Lecture Halls", "LOU", 42.96506869892937, -85.88820042430099))
+        markers.add(Marker("Henry Hall", "HRY", 42.964727820032046, -85.88826624767209))
+        markers.add(Marker("Kindschi Hall of Science", "KHS", 42.96583417192454, -85.88916328673147))
+        markers.add(Marker("Fieldhouse", "---", 42.96766498636191, -85.88964452838229))
+        markers.add(Marker("Rec Center", "---", 42.96635871063172, -85.8901783137834))
+        markers.add(Marker("Zumberge Hall", "JHZ", 42.96294819888922, -85.886871878526))
+        markers.add(Marker("Lake Superior Hall", "LSH", 42.96203720957562, -85.88663759880195))
+        markers.add(Marker("Lake Michigan Hall", "LMH", 42.96139810397481, -85.88616153940927))
+        markers.add(Marker("Lake Ontario Hall", "LOH", 42.961359661316735, -85.88510107608539))
+        markers.add(Marker("Lake Huron Hall", "LHH", 42.96267630853912, -85.88521270381064))
+        markers.add(Marker("Au Sable Hall", "ASH", 42.963234185642094, -85.88544012676792))
+        markers.add(Marker("Calder Fine Arts Center", "CAC", 42.961243306036714, -85.88306139124832))
+        markers.add(Marker("Niemeyer Honors College", "HON", 42.959924364341504, -85.88573370728348))
+        markers.add(Marker("The Blue Connection", "CON", 42.95978323769912, -85.88845960262452))
+        markers.add(Marker("Mary Idema Pew Library", "LIB", 42.96295970019208, -85.88987411505184))
+
+
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -57,7 +86,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add the markers and move the camera
         val allendale_location = LatLng(42.96349236278699, -85.89065017075002)
 
-        mMap.addMarker(MarkerOptions().position(LatLng(42.96659164804782, -85.88666565494535)).title("Mackinac Hall").snippet("MAK"))
+        for (marker in markers) {
+            mMap.addMarker(MarkerOptions().position(LatLng(marker.lat, marker.long)).title(marker.name).snippet(marker.snippet))
+        }
+        //mMap.addMarker(MarkerOptions().position(LatLng(42.96659164804782, -85.88666565494535)).title("Mackinac Hall").snippet("MAK"))
 
         //mMap.addMarker(MarkerOptions().position(allendale_location).title("Allendale Campus"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(allendale_location))
