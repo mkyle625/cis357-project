@@ -5,4 +5,25 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string-array name="Building">
+        <item>Mackinac Hall</item>
+        <item>Manitou Hall</item>
+        <item>Padnos Hall of Science</item>
+        <item>Loutit Lecture Halls</item>
+        <item>Henry Hall</item>
+        <item>Kindschi Hall of Science</item>
+        <item>Fieldhouse</item>
+        <item>Rec Center</item>
+        <item>Zumberge Hall</item>
+        <item>Lake Superior Hall</item>
+        <item>Lake Michigan Hall</item>
+        <item>Lake Ontario Hall</item>
+        <item>Lake Huron Hall</item>
+        <item>Au Sable Hall</item>
+        <item>Calder Fine Arts Center</item>
+        <item>Niemeyer Honors College</item>
+        <item>The Blue Connection</item>
+        <item>Mary Idema Pew Library</item>
+    </string-array>
 </resources>
+

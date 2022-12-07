@@ -12,7 +12,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
@@ -22,15 +21,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
-
-    data class Marker(
-        val name: String,
-        val snippet: String,
-        val lat: Double,
-        val long: Double
-    )
-
-    var markers: MutableList<Marker> = mutableListOf()
+    var markers: ArrayList<Marker> = ArrayList()
+    var history: ArrayList<HistoryObject> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +62,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -107,11 +100,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             // do something
             val toSchedule = Intent(this@MapsActivity, ScheduleActivity::class.java)
             val extras = Bundle()
-            //extras.putString("DISTANCE_UNITS", distanceUnits)
-            //extras.putString("BEARING_UNITS", bearingUnits)
+            extras.putParcelableArrayList("HISTORY", history)
+            extras.putParcelableArrayList("MARKERS", markers)
+
             toSchedule.putExtras(extras)
             scheduleLauncher.launch(toSchedule)
-            //startActivity(toSettings)
             return true
         }
         return false
@@ -121,6 +114,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             val extras = data?.extras
+            if (extras != null) {
+                history = extras.getParcelableArrayList<HistoryObject>("HISTORY") as ArrayList<HistoryObject>
+            }
+
             //distanceUnits = extras?.getString("DISTANCE_SELECTION").toString()
             //bearingUnits = extras?.getString("BEARING_SELECTION").toString()
             //calcButton?.performClick()
