@@ -54,4 +54,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="154dp" />
 
+    <ListView
+        android:id="@+id/scheduleList"
+        android:layout_width="409dp"
+        android:layout_height="190dp"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toTopOf="@+id/saveButton"
+        tools:layout_editor_absoluteX="1dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

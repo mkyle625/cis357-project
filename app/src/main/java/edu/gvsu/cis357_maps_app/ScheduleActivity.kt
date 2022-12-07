@@ -6,11 +6,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.gvsu.cis357_maps_app.CheckableSpinnerAdapter.SpinnerItem
@@ -25,7 +21,7 @@ class ScheduleActivity : AppCompatActivity() {
     private var location: String? = null
     var markers: ArrayList<Marker> = ArrayList()
     var history: ArrayList<HistoryObject> = ArrayList()
-
+    var selectedLocation: String = "none"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         print("test")
@@ -54,6 +50,23 @@ class ScheduleActivity : AppCompatActivity() {
                 location = adapterView.getItemAtPosition(i) as String
             }
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+        }
+
+        val listView = findViewById<ListView>(R.id.scheduleList)
+        val listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, history)
+        listView.adapter = listAdapter
+
+        listView.setOnItemClickListener { _, _, pos, _ ->
+            val selectedItem = history[pos]
+            Log.i("test location: ", selectedItem.location)
+            selectedLocation = selectedItem.location
+            //selectedLocation = selectedItem.location
+            //val intent = Intent()
+            //v//al extras = Bundle()
+            //extras.putString("LOCATION_TAPPED", selectedLocation)
+            //intent.putExtra("LOCATION_TAPPED", selectedLocation)
+            //setResult(RESULT_OK, intent)
+            //finish()
         }
 
         findViewById<Button>(R.id.saveButton).setOnClickListener { view ->
@@ -169,6 +182,7 @@ class ScheduleActivity : AppCompatActivity() {
             val intent = Intent()
             val extras = Bundle()
             extras.putParcelableArrayList("HISTORY", history)
+            extras.putString("LOCATION_TAPPED", selectedLocation)
             intent.putExtras(extras)
             setResult(RESULT_OK, intent)
             finish()

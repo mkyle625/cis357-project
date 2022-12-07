@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +24,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     var markers: ArrayList<Marker> = ArrayList()
     var history: ArrayList<HistoryObject> = ArrayList()
+
+    var selectedLocation: String = "none"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +105,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val extras = Bundle()
             extras.putParcelableArrayList("HISTORY", history)
             extras.putParcelableArrayList("MARKERS", markers)
-
+            extras.putString("LOCATION_TAPPED", "none")
             toSchedule.putExtras(extras)
             scheduleLauncher.launch(toSchedule)
             return true
@@ -116,6 +119,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val extras = data?.extras
             if (extras != null) {
                 history = extras.getParcelableArrayList<HistoryObject>("HISTORY") as ArrayList<HistoryObject>
+                selectedLocation = extras.getString("LOCATION_TAPPED")!!
+
+                // If the selected location is not null, center the map on it
+                for (marker in markers) {
+                    if (marker.name == selectedLocation) {
+                        val temp_latlng = LatLng(marker.lat, marker.long)
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(temp_latlng))
+                        mMap.setMinZoomPreference(17.0f)
+                        mMap.setMaxZoomPreference(20.0f)
+                    }
+                }
+
             }
 
             //distanceUnits = extras?.getString("DISTANCE_SELECTION").toString()
