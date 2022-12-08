@@ -2,20 +2,21 @@ package edu.gvsu.cis357_maps_app
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import edu.gvsu.cis357_maps_app.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -24,6 +25,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     var markers: ArrayList<Marker> = ArrayList()
     var history: ArrayList<HistoryObject> = ArrayList()
+    var on_map_markers: ArrayList<com.google.android.gms.maps.model.Marker> = ArrayList()
+
 
     var selectedLocation: String = "none"
 
@@ -84,6 +87,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         for (marker in markers) {
             mMap.addMarker(MarkerOptions().position(LatLng(marker.lat, marker.long)).title(marker.name).snippet(marker.snippet))
+                ?.let { on_map_markers.add(it) }
         }
         //mMap.addMarker(MarkerOptions().position(LatLng(42.96659164804782, -85.88666565494535)).title("Mackinac Hall").snippet("MAK"))
 
@@ -119,26 +123,166 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val extras = data?.extras
             if (extras != null) {
                 history = extras.getParcelableArrayList<HistoryObject>("HISTORY") as ArrayList<HistoryObject>
-                selectedLocation = extras.getString("LOCATION_TAPPED")!!
+                val locationTapped: String? = extras.getString("LOCATION_TAPPED")
+                if(locationTapped != null && locationTapped.isNotEmpty()){
+                    selectedLocation = locationTapped
+                }
+                else{
+                    val c = Calendar.getInstance()
+                    val hour = c.get(Calendar.HOUR_OF_DAY)
+                    val minute = c.get(Calendar.MINUTE)
+                    val day = c.get(Calendar.DAY_OF_WEEK)
+                    var closest_hours = 999
+                    var closest_minutes = 999
+                    var closest_marker = ""
+                    if(history.size > 0){
+                        if(day == 1){
+                            for(obj in history){
+                                if(obj.sunday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 2){
+                            for(obj in history){
+                                if(obj.monday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 3){
+                            for(obj in history){
+                                if(obj.tuesday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 4){
+                            for(obj in history){
+                                if(obj.wednesday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 5){
+                            for(obj in history){
+                                if(obj.thursday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 6){
+                            for(obj in history){
+                                if(obj.friday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
+                        if(day == 7){
+                            for(obj in history){
+                                if(obj.saturday){
+                                    if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
+                                        closest_hours = obj.hours
+                                        closest_minutes = obj.minutes
+                                        closest_marker = obj.location
+                                    }
+                                }
+                            }
+                        }
 
+                        //reset all of the marker colors to red
+                        for(marker in on_map_markers){
+                            marker.setIcon(BitmapDescriptorFactory.defaultMarker(
+                                BitmapDescriptorFactory.HUE_RED))
+                        }
+                        //update camera and zoom to center around marker, add yellow circle
+                        var index = 0
+                        for (marker in markers) {
+                            if (marker.name == closest_marker) {
+                                //center map around point
+                                val temp_latlng = LatLng(marker.lat, marker.long)
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(temp_latlng))
+                                mMap.setMinZoomPreference(17.0f)
+                                mMap.setMaxZoomPreference(20.0f)
+
+                                //set marker color to cyan
+                                on_map_markers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
+                                    BitmapDescriptorFactory.HUE_CYAN))
+
+                                //add yellow circle using maps SDK
+                                mMap.addCircle(CircleOptions().center(temp_latlng).radius(15.0).fillColor(
+                                    Color.argb(50, 150, 150, 0)))
+
+                                //show Toast message informing the user of the change
+                                val duration = Toast.LENGTH_SHORT
+                                val text = "Map centered around $closest_marker"
+                                val toast = Toast.makeText(applicationContext, text, duration)
+                                toast.show()
+                            }
+                            index += 1
+                        }
+                    }
+                }
+
+                //reset all of the marker colors to red
+                for(marker in on_map_markers){
+                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(
+                        BitmapDescriptorFactory.HUE_RED))
+                }
+
+                var index = 0
                 // If the selected location is not null, center the map on it
                 for (marker in markers) {
                     if (marker.name == selectedLocation) {
+                        //center map around point
                         val temp_latlng = LatLng(marker.lat, marker.long)
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(temp_latlng))
                         mMap.setMinZoomPreference(17.0f)
                         mMap.setMaxZoomPreference(20.0f)
+
+                        //set marker color to green
+                        on_map_markers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
+                            BitmapDescriptorFactory.HUE_GREEN))
+
+                        //add blue circle using maps SDK
+                        mMap.addCircle(CircleOptions().center(temp_latlng).radius(15.0).fillColor(
+                            Color.argb(50, 25, 25, 150)))
+
+                        //show Toast message informing the user of the change
+                        val duration = Toast.LENGTH_SHORT
+                        var text = "Map centered around " + selectedLocation
+                        val toast = Toast.makeText(applicationContext, text, duration)
+                        toast.show()
                     }
+                    index += 1
                 }
 
             }
 
-            //distanceUnits = extras?.getString("DISTANCE_SELECTION").toString()
-            //bearingUnits = extras?.getString("BEARING_SELECTION").toString()
-            //calcButton?.performClick()
-            //val tv = findViewById<TextView>(R.id.message)
-            //vice = data?.getStringExtra("vice") ?: "Steak"
-            //tv.text = "Your vice is: " + vice
         }
     }
 }
