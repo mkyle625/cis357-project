@@ -6,10 +6,8 @@ import android.graphics.Color
 import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -23,9 +21,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
-    var markers: ArrayList<Marker> = ArrayList()
+    private var markers: ArrayList<Marker> = ArrayList()
     var history: ArrayList<HistoryObject> = ArrayList()
-    var on_map_markers: ArrayList<com.google.android.gms.maps.model.Marker> = ArrayList()
+    private var onMapMarkers: ArrayList<com.google.android.gms.maps.model.Marker> = ArrayList()
 
 
     var selectedLocation: String = "none"
@@ -42,7 +40,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         // Add the markers
-        addMarkers();
+        addMarkers()
     }
 
     private fun addMarkers() {
@@ -80,19 +78,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
+        val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style))
 
         // Add the markers and move the camera
-        val allendale_location = LatLng(42.96349236278699, -85.89065017075002)
+        val allendaleLocation = LatLng(42.96349236278699, -85.89065017075002)
 
+        //add all the markers to the map and add them to list
         for (marker in markers) {
             mMap.addMarker(MarkerOptions().position(LatLng(marker.lat, marker.long)).title(marker.name).snippet(marker.snippet))
-                ?.let { on_map_markers.add(it) }
+                ?.let { onMapMarkers.add(it) }
         }
-        //mMap.addMarker(MarkerOptions().position(LatLng(42.96659164804782, -85.88666565494535)).title("Mackinac Hall").snippet("MAK"))
 
-        //mMap.addMarker(MarkerOptions().position(allendale_location).title("Allendale Campus"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(allendale_location))
+        //set map centered on campus and set zoom level
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(allendaleLocation))
         mMap.setMinZoomPreference(15.0f)
         mMap.setMaxZoomPreference(20.0f)
     }
@@ -104,7 +102,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_schedule) {
-            // do something
+            // send history and markers to scheduleActivity and launch scheduleActivity
             val toSchedule = Intent(this@MapsActivity, ScheduleActivity::class.java)
             val extras = Bundle()
             extras.putParcelableArrayList("HISTORY", history)
@@ -124,13 +122,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (extras != null) {
                 history = extras.getParcelableArrayList<HistoryObject>("HISTORY") as ArrayList<HistoryObject>
                 val locationTapped: String? = extras.getString("LOCATION_TAPPED")
+
+                //check if optional "LOCATION_TAPPED" has value
                 if(locationTapped != null && locationTapped.isNotEmpty()){
+
                     //reset all of the marker colors to red
-                    for(marker in on_map_markers){
+                    for(marker in onMapMarkers){
                         marker.setIcon(BitmapDescriptorFactory.defaultMarker(
                             BitmapDescriptorFactory.HUE_RED))
                     }
 
+                    // check that locationTapped is not "none" then set focus on point
                     if(locationTapped != "none"){
                         selectedLocation = locationTapped
 
@@ -139,44 +141,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         for (marker in markers) {
                             if (marker.name == selectedLocation) {
                                 //center map around point
-                                val temp_latlng = LatLng(marker.lat, marker.long)
-                                mMap.moveCamera(CameraUpdateFactory.newLatLng(temp_latlng))
+                                val tempLatlng = LatLng(marker.lat, marker.long)
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(tempLatlng))
                                 mMap.setMinZoomPreference(17.0f)
                                 mMap.setMaxZoomPreference(20.0f)
 
                                 //set marker color to green
-                                on_map_markers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
+                                onMapMarkers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
                                     BitmapDescriptorFactory.HUE_GREEN))
 
                                 //add blue circle using maps SDK
-                                mMap.addCircle(CircleOptions().center(temp_latlng).radius(15.0).fillColor(
+                                mMap.addCircle(CircleOptions().center(tempLatlng).radius(15.0).fillColor(
                                     Color.argb(50, 25, 25, 150)))
-
-                                //show Toast message informing the user of the change
-                                val duration = Toast.LENGTH_SHORT
-                                var text = "Map centered around " + selectedLocation
-                                val toast = Toast.makeText(applicationContext, text, duration)
-                                toast.show()
                             }
                             index += 1
                         }
                     }
                     else{
+                        //center map on marker for class closest in time in future in same day
                         val c = Calendar.getInstance()
                         val hour = c.get(Calendar.HOUR_OF_DAY)
                         val minute = c.get(Calendar.MINUTE)
                         val day = c.get(Calendar.DAY_OF_WEEK)
-                        var closest_hours = 999
-                        var closest_minutes = 999
-                        var closest_marker = ""
+                        var closestHours = 999
+                        var closestMinutes = 999
+                        var closestMarker = ""
                         if(history.size > 0){
+                            //determine closest marker by time within the current day
                             if(day == 1){
                                 for(obj in history){
                                     if(obj.sunday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -184,10 +182,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 2){
                                 for(obj in history){
                                     if(obj.monday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -195,10 +193,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 3){
                                 for(obj in history){
                                     if(obj.tuesday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -206,10 +204,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 4){
                                 for(obj in history){
                                     if(obj.wednesday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -217,10 +215,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 5){
                                 for(obj in history){
                                     if(obj.thursday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -228,10 +226,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 6){
                                 for(obj in history){
                                     if(obj.friday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -239,10 +237,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             if(day == 7){
                                 for(obj in history){
                                     if(obj.saturday){
-                                        if (obj.hours >= hour && obj.hours <= closest_hours && obj.minutes >= minute && obj.minutes <= closest_minutes){
-                                            closest_hours = obj.hours
-                                            closest_minutes = obj.minutes
-                                            closest_marker = obj.location
+                                        if (obj.hours >= hour && obj.hours <= closestHours && obj.minutes >= minute && obj.minutes <= closestMinutes){
+                                            closestHours = obj.hours
+                                            closestMinutes = obj.minutes
+                                            closestMarker = obj.location
                                         }
                                     }
                                 }
@@ -251,7 +249,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             //update camera and zoom to center around marker, add yellow circle
                             var index = 0
                             for (marker in markers) {
-                                if (marker.name == closest_marker) {
+                                if (marker.name == closestMarker) {
                                     //center map around point
                                     val temp_latlng = LatLng(marker.lat, marker.long)
                                     mMap.moveCamera(CameraUpdateFactory.newLatLng(temp_latlng))
@@ -259,18 +257,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                     mMap.setMaxZoomPreference(20.0f)
 
                                     //set marker color to cyan
-                                    on_map_markers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
+                                    onMapMarkers[index].setIcon(BitmapDescriptorFactory.defaultMarker(
                                         BitmapDescriptorFactory.HUE_CYAN))
 
                                     //add yellow circle using maps SDK
                                     mMap.addCircle(CircleOptions().center(temp_latlng).radius(15.0).fillColor(
                                         Color.argb(50, 150, 150, 0)))
-
-                                    //show Toast message informing the user of the change
-                                    val duration = Toast.LENGTH_SHORT
-                                    val text = "Map centered around $closest_marker"
-                                    val toast = Toast.makeText(applicationContext, text, duration)
-                                    toast.show()
                                 }
                                 index += 1
                             }

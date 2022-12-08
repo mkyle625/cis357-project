@@ -3,6 +3,8 @@ package edu.gvsu.cis357_maps_app
 import android.os.Parcel
 import android.os.Parcelable
 
+//object for storing scheduled events
+//IDE generated parcelable implementation
 data class HistoryObject(
     val labelName: String,
     val location: String,

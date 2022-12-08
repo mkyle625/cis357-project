@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Set;
 
+//adapter implementation found at https://stackoverflow.com/questions/38417984/android-spinner-dropdown-checkbox
+//created by Harshad Pansuriya
 public class CheckableSpinnerAdapter<T> extends BaseAdapter {
 
     static class SpinnerItem<T> {

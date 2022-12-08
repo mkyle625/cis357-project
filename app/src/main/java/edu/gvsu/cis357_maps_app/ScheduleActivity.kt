@@ -7,14 +7,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.gvsu.cis357_maps_app.CheckableSpinnerAdapter.SpinnerItem
 import java.util.*
 import kotlin.collections.ArrayList
 
 class ScheduleActivity : AppCompatActivity() {
-    private val spinner_items: ArrayList<SpinnerItem<DayObject>> = ArrayList()
-    private val selected_items: HashSet<DayObject> = HashSet()
+    private val spinnerItems: ArrayList<SpinnerItem<DayObject>> = ArrayList()
+    private val selectedItems: HashSet<DayObject> = HashSet()
     private var time: TimePickerFragment? = null
     private var textName: String? = null
     private var location: String? = null
@@ -26,29 +25,35 @@ class ScheduleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_schedule)
         createDayObjects()
+
+        //get history and markers from bundle
         val extras = intent.extras
         if (extras != null) {
             markers = extras.getParcelableArrayList<Marker>("MARKERS") as ArrayList<Marker>
             history = extras.getParcelableArrayList<HistoryObject>("HISTORY") as ArrayList<HistoryObject>
         }
+
+        //setup checkablespinner to allow a dropdown of checkboxes on spinner click
         val headerText = "Select the days for the event"
         val spinner = findViewById<Spinner>(R.id.CheckableSpinnerItem)
-        val adapter: CheckableSpinnerAdapter<DayObject> = CheckableSpinnerAdapter<DayObject>(this, headerText, spinner_items, selected_items)
-        spinner.adapter = adapter;
+        val adapter: CheckableSpinnerAdapter<DayObject> = CheckableSpinnerAdapter<DayObject>(this, headerText, spinnerItems, selectedItems)
+        spinner.adapter = adapter
 
-        val location_spinner = findViewById<Spinner>(R.id.BuildingPicker)
-        val location_adapter = ArrayAdapter.createFromResource(this, R.array.Building,
+        //setup spinner for picking location using values/strings.xml array
+        val locationSpinner = findViewById<Spinner>(R.id.BuildingPicker)
+        val locationAdapter = ArrayAdapter.createFromResource(this, R.array.Building,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item
         )
-        location_adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item)
-        location_spinner.adapter = location_adapter
-        location_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        locationAdapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item)
+        locationSpinner.adapter = locationAdapter
+        locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long) {
                 location = adapterView.getItemAtPosition(i) as String
             }
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
         }
 
+        //populate listview with formatted string based on HistoryObject
         val listView = findViewById<ListView>(R.id.scheduleList)
         val textList = kotlin.collections.ArrayList<String>()
         for(obj in history){
@@ -86,20 +91,25 @@ class ScheduleActivity : AppCompatActivity() {
                 i += 1
             }
 
+            //create string for time of event from object data
             var timeString = ""
             var hourFormatted = obj.hours % 12
             if(hourFormatted == 0){
                 hourFormatted = 12
             }
             timeString += hourFormatted.toString()
-            if(obj.hours > 12){
-                timeString += "PM"
+            timeString += ":"
+            timeString += obj.minutes.toString()
+            timeString += if(obj.hours > 12){
+                "PM"
             } else{
-                timeString += "AM"
+                "AM"
             }
             textList.add(obj.labelName + ": " + obj.snippet + "; " + timeString + "; " + daysString)
         }
-        val listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, history)
+
+        //setup list view and listener
+        val listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, textList)
         listView.adapter = listAdapter
 
         listView.setOnItemClickListener { _, _, pos, _ ->
@@ -118,19 +128,19 @@ class ScheduleActivity : AppCompatActivity() {
             val timeGiven = time != null
             val labelGiven = textName != null
             val locationGiven = location != null
-            val daySelected = selected_items.size > 0
+            val daySelected = selectedItems.size > 0
 
             if(timeGiven && labelGiven && locationGiven && daySelected){
-                var mondaySelected: Boolean = false
-                var tuesdaySelected: Boolean = false
-                var wednesdaySelected: Boolean = false
-                var thursdaySelected: Boolean = false
-                var fridaySelected: Boolean = false
-                var saturdaySelected: Boolean = false
-                var sundaySelected: Boolean = false
+                var mondaySelected = false
+                var tuesdaySelected = false
+                var wednesdaySelected = false
+                var thursdaySelected = false
+                var fridaySelected = false
+                var saturdaySelected = false
+                var sundaySelected = false
 
                 //convert the string names of the days into boolean values for parcel
-                for (day in selected_items){
+                for (day in selectedItems){
                     if (day.getName() == "Monday"){
                         mondaySelected = true
                     }
@@ -183,21 +193,21 @@ class ScheduleActivity : AppCompatActivity() {
     }
 
     fun createDayObjects(){
-        val monObj: DayObject = DayObject("Monday")
-        val tuesObj: DayObject = DayObject("Tuesday")
-        val wedObj: DayObject = DayObject("Wednesday")
-        val thurObj: DayObject = DayObject("Thursday")
-        val friObj: DayObject = DayObject("Friday")
-        val satObj: DayObject = DayObject("Saturday")
-        val sunObj: DayObject = DayObject("Sunday")
+        val monObj = DayObject("Monday")
+        val tuesObj = DayObject("Tuesday")
+        val wedObj = DayObject("Wednesday")
+        val thurObj = DayObject("Thursday")
+        val friObj = DayObject("Friday")
+        val satObj = DayObject("Saturday")
+        val sunObj = DayObject("Sunday")
 
-        spinner_items.add(SpinnerItem<DayObject>(monObj, monObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(tuesObj, tuesObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(wedObj, wedObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(thurObj, thurObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(friObj, friObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(satObj, satObj.getName()))
-        spinner_items.add(SpinnerItem<DayObject>(sunObj, sunObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(monObj, monObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(tuesObj, tuesObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(wedObj, wedObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(thurObj, thurObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(friObj, friObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(satObj, satObj.getName()))
+        spinnerItems.add(SpinnerItem<DayObject>(sunObj, sunObj.getName()))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -208,6 +218,7 @@ class ScheduleActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == R.id.action_back) {
+            //send history and location_tapped to mapactivity
             val intent = Intent()
             val extras = Bundle()
             extras.putParcelableArrayList("HISTORY", history)

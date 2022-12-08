@@ -8,6 +8,7 @@ import android.text.format.DateFormat
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 
+//time picker found at https://developer.android.com/develop/ui/views/components/pickers
 class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
     var hours: Int = 0
     var minutes: Int = 0

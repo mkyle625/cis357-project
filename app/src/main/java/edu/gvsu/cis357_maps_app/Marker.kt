@@ -3,6 +3,8 @@ package edu.gvsu.cis357_maps_app
 import android.os.Parcel
 import android.os.Parcelable
 
+//data class for information in Markers
+//IDE auto-generated Parcelable implementation
 data class Marker(
     val name: String?,
     val snippet: String?,
