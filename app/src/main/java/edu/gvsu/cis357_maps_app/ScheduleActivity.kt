@@ -164,45 +164,6 @@ class ScheduleActivity : AppCompatActivity() {
                 history.add(HistoryObject(textName!!,
                     marker.name!!,
                     marker.snippet!!, marker.lat, marker.long, minutes, hours, mondaySelected, tuesdaySelected, wednesdaySelected, thursdaySelected, fridaySelected, saturdaySelected, sundaySelected))
-
-                val duration = Toast.LENGTH_SHORT
-                val text = "Event added to schedule; go to map screen and return to see in history list"
-                //show toast to let user know what they need to do
-                val toast = Toast.makeText(applicationContext, text, duration)
-                toast.show()
-            }
-            else{
-                val errorList = kotlin.collections.ArrayList<String>()
-                val duration = Toast.LENGTH_SHORT
-                var text = ""
-                var index = 0
-
-                //determine which of the inputs was missing and create error message
-                if(!timeGiven){
-                    errorList.add("no time given for event")
-                }
-                if(!labelGiven){
-                    errorList.add("No name given for event")
-                }
-                if(!locationGiven){
-                    errorList.add("No location given for event")
-                }
-                if(!daySelected){
-                    errorList.add("No days given for event")
-                }
-
-                //combine error messages into 1 string for Toast popup
-                for (errorMessage in errorList){
-                    text += errorMessage
-                    if(index < errorList.size - 1){
-                        text += "; "
-                    }
-                    index += 1
-                }
-
-                //show toast to let user know what they need to do
-                val toast = Toast.makeText(applicationContext, text, duration)
-                toast.show()
             }
         }
     }
