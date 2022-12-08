@@ -10,39 +10,43 @@
         android:id="@+id/ClassTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:onClick="showTimePickerDialog"
         android:text="Class Time"
-        app:layout_constraintBottom_toTopOf="@+id/saveButton"
-        app:layout_constraintTop_toBottomOf="@+id/BuildingPicker"
-        tools:layout_editor_absoluteX="143dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/BuildingPicker" />
 
     <Spinner
         android:id="@+id/BuildingPicker"
-        android:layout_width="159dp"
+        android:layout_width="250dp"
         android:layout_height="30dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="8dp"
         android:entries="@array/Building"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextClassLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/CheckableSpinnerItem" />
 
     <Spinner
         android:id="@+id/CheckableSpinnerItem"
-        android:layout_width="160dp"
-        android:layout_height="18dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="350dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="8dp"
         android:spinnerMode="dialog"
         app:layout_constraintTop_toBottomOf="@+id/editTextClassLabel"
-        tools:layout_editor_absoluteX="125dp" />
+        tools:layout_editor_absoluteX="30dp" />
 
     <EditText
         android:id="@+id/editTextClassLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="199dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
+        android:hint="Name"
         android:inputType="textShortMessage|text"
-        android:text="Name"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -50,16 +54,19 @@
         android:id="@+id/saveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Save"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="154dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ClassTime" />
 
     <ListView
         android:id="@+id/scheduleList"
         android:layout_width="409dp"
         android:layout_height="190dp"
-        android:layout_marginBottom="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/saveButton"
-        tools:layout_editor_absoluteX="1dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
