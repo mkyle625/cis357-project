@@ -174,6 +174,70 @@ class ScheduleActivity : AppCompatActivity() {
                 history.add(HistoryObject(textName!!,
                     marker.name!!,
                     marker.snippet!!, marker.lat, marker.long, minutes, hours, mondaySelected, tuesdaySelected, wednesdaySelected, thursdaySelected, fridaySelected, saturdaySelected, sundaySelected))
+
+                //populate listview with formatted string based on HistoryObject
+                val listView = findViewById<ListView>(R.id.scheduleList)
+                val textList = kotlin.collections.ArrayList<String>()
+                for(obj in history){
+                    val daysList = kotlin.collections.ArrayList<String>()
+                    var i = 0
+                    var daysString = ""
+                    if(obj.sunday){
+                        daysList.add("Sunday")
+                    }
+                    if(obj.monday){
+                        daysList.add("Monday")
+                    }
+                    if(obj.tuesday){
+                        daysList.add("Tuesday")
+                    }
+                    if(obj.wednesday){
+                        daysList.add("Wednesday")
+                    }
+                    if(obj.thursday){
+                        daysList.add("Thursday")
+                    }
+                    if(obj.friday){
+                        daysList.add("Friday")
+                    }
+                    if(obj.saturday){
+                        daysList.add("Saturday")
+                    }
+
+                    //create string of days of the week
+                    for (dayMessage in daysList){
+                        daysString += dayMessage
+                        if(i < daysList.size - 1){
+                            daysString += "; "
+                        }
+                        i += 1
+                    }
+
+                    //create string for time of event from object data
+                    var timeString = ""
+                    var hourFormatted = obj.hours % 12
+                    if(hourFormatted == 0){
+                        hourFormatted = 12
+                    }
+                    timeString += hourFormatted.toString()
+                    timeString += ":"
+                    timeString += obj.minutes.toString()
+                    timeString += if(obj.hours > 12){
+                        "PM"
+                    } else{
+                        "AM"
+                    }
+                    textList.add(obj.labelName + ": " + obj.snippet + "; " + timeString + "; " + daysString)
+                }
+
+                //setup list view and listener
+                val listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, textList)
+                listView.adapter = listAdapter
+
+                listView.setOnItemClickListener { _, _, pos, _ ->
+                    val selectedItem = history[pos]
+                    selectedLocation = selectedItem.location
+                }
             }
         }
     }
